@@ -4,7 +4,7 @@ import fs = require("fs-extra");
 import os = require("os");
 import path = require("path");
 import { URL } from "url";
-import { commands, FileSystemWatcher, RelativePattern, StatusBarItem, Uri, ViewColumn, Webview, window, workspace } from "vscode";
+import { commands, FileSystemWatcher, RelativePattern, StatusBarItem, Uri, ViewColumn, Webview, window, workspace, WebviewPanel } from "vscode";
 import { chooseTerminalAndSendText } from "./rTerminal";
 import { config } from "./util";
 
@@ -15,6 +15,7 @@ let plotWatcher: FileSystemWatcher;
 let PID: string;
 let resDir: string;
 const sessionDir = path.join(".vscode", "vscode-R");
+let plotPanel: WebviewPanel;
 
 export function deploySessionWatcher(extensionPath: string) {
     resDir = path.join(extensionPath, "dist", "resources");
@@ -76,26 +77,74 @@ function updateSessionWatcher() {
     plotWatcher = workspace.createFileSystemWatcher(
         new RelativePattern(
             workspace.workspaceFolders[0],
-            path.join(sessionDir, PID, "plot.png")));
+            path.join(sessionDir, PID, "plot.svg")));
     plotWatcher.onDidCreate(updatePlot);
     plotWatcher.onDidChange(updatePlot);
 }
 
 function _updatePlot() {
     const plotPath = path.join(workspace.workspaceFolders[0].uri.fsPath,
-        sessionDir, PID, "plot.png");
+        sessionDir, PID, "plot.svg");
     if (fs.existsSync(plotPath)) {
-        commands.executeCommand("vscode.open", Uri.file(plotPath), {
-            preserveFocus: true,
-            preview: true,
-            viewColumn: ViewColumn.Two,
-        });
+        if (plotPanel == undefined) {
+            plotPanel = window.createWebviewPanel("plotview", "Plot",
+                {
+                    preserveFocus: true,
+                    viewColumn: ViewColumn.Two,
+                },
+                {
+                    enableScripts: true,
+                });
+            plotPanel.onDidDispose((e) => {
+                plotPanel = undefined;
+            });
+            plotPanel.webview.html = getPlotHtml(plotPanel.webview, plotPath);
+        } else {
+            plotPanel.webview.postMessage({ command: "reload" });
+        }
         console.info("Updated plot");
     }
 }
 
 function updatePlot(event) {
     _updatePlot();
+}
+
+function getPlotHtml(webview: Webview, file: string) {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    #plot {
+        width: 100%;
+        height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <embed id="plot" type="image/svg+xml" />
+  </div>
+  <script>
+    const plotUrl = "${webview.asWebviewUri(Uri.file(file))}";
+    const plot = document.getElementById('plot');
+    plot.src = plotUrl;
+    window.addEventListener('message', event => {
+            const message = event.data;
+            switch (message.command) {
+                case 'reload':
+                    plot.src = "";
+                    plot.src = plotUrl;
+                    break;
+            }
+        });
+  </script>
+</body>
+</html>
+`;
 }
 
 async function _updateGlobalenv() {

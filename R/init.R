@@ -13,7 +13,7 @@ if (interactive() &&
 
       response_file <- file.path(dir, "response.log")
       globalenv_file <- file.path(dir_session, "globalenv.json")
-      plot_file <- file.path(dir_session, "plot.png")
+      plot_file <- file.path(dir_session, "plot.svg")
       plot_updated <- FALSE
 
       options(vscodeR = environment())
@@ -62,7 +62,7 @@ if (interactive() &&
           plot_updated <<- FALSE
           record <- recordPlot()
           if (length(record[[1]])) {
-            png(plot_file)
+            svg(plot_file)
             on.exit(dev.off())
             replayPlot(record)
           }
