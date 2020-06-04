@@ -452,8 +452,38 @@
     },
     "configuration": {
       "type": "object",
-      "title": "r",
+      "title": "R",
       "properties": {
+        "r.lsp.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to R binary for launching Language Server"
+        },
+        "r.lsp.args": {
+          "type": "array",
+          "default": [],
+          "description": "The command line arguments to use when launching R Language Server"
+        },
+        "r.lsp.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Debug R Language Server"
+        },
+        "r.lsp.diagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Diagnostics"
+        },
+        "r.lsp.lang": {
+          "type": "string",
+          "default": "",
+          "description": "Override default LANG environment variable"
+        },
+        "r.lsp.use_stdio": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use STDIO connection instead of TCP. (Unix/macOS users only)"
+        },
         "r.rterm.windows": {
           "type": "string",
           "default": "",
@@ -462,7 +492,7 @@
         "r.rterm.mac": {
           "type": "string",
           "default": "/usr/local/bin/R",
-          "description": "R path for Mac OS X."
+          "description": "R path for macOS."
         },
         "r.rterm.linux": {
           "type": "string",
@@ -561,6 +591,8 @@
     "jquery.json-viewer": "^1.4.0",
     "popper.js": "^1.16.1",
     "winattr": "^3.0.0",
-    "winreg": "^1.2.4"
+    "winreg": "^1.2.4",
+    "mz": "^2.7.0",
+    "vscode-languageclient": "^5.1.1"
   }
 }

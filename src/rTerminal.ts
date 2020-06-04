@@ -9,12 +9,12 @@ import { commands, Terminal, TerminalOptions, window } from 'vscode';
 
 import { getSelection } from './selection';
 import { removeSessionFiles } from './session';
-import { config, delay, getRpath } from './util';
+import { config, delay, getRterm } from './util';
 export let rTerm: Terminal;
 
 export async function createRTerm(preserveshow?: boolean): Promise<boolean> {
     const termName = 'R Interactive';
-    const termPath = await getRpath();
+    const termPath = await getRterm();
     console.info(`termPath: ${termPath}`);
     if (termPath === undefined) {
         return undefined;
