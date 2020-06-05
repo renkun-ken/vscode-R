@@ -10,6 +10,20 @@ export function config() {
     return workspace.getConfiguration('r');
 }
 
+async function getRfromRegistry() {
+    try {
+        const key = new winreg({
+            hive: winreg.HKLM,
+            key: '\\Software\\R-Core\\R',
+        });
+        const item: winreg.RegistryItem = await new Promise((c, e) =>
+            key.get('InstallPath', (err, result) => err === null ? c(result) : e(err)));
+        return path.join(item.value, 'bin', 'R.exe');
+    } catch (e) {
+        return '';
+    }
+}
+
 function getRfromEnvPath(platform: string) {
     let splitChar: string = ':';
     let fileExtension: string = '';
@@ -30,39 +44,52 @@ function getRfromEnvPath(platform: string) {
 }
 
 export async function getRpath() {
+    let path: string = config().get('lsp.path');
+    const platform: string = process.platform;
     
-    let rpath: string = '';
+    if (path && existsSync(path)) {
+        return path;
+    }
+
+    if (process.platform === 'win32') {
+        path = await getRfromRegistry();
+        if (path && existsSync(path)) {
+            return path;
+        }
+    }
+
+    if (path === '') {
+        path = getRfromEnvPath(platform);
+    }
+    if (path !== '') {
+        return path;
+    }
+
+    return 'R';
+}
+
+export async function getRterm() {
+    let path: string = '';
     const platform: string = process.platform;
     
     if ( platform === 'win32') {
-        rpath = config().get<string>('rterm.windows');
-        if (rpath === '') {
-            // Find path from registry
-            try {
-                const key = new winreg({
-                    hive: winreg.HKLM,
-                    key: '\\Software\\R-Core\\R',
-                });
-                const item: winreg.RegistryItem = await new Promise((c, e) =>
-                    key.get('InstallPath', (err, result) => err === null ? c(result) : e(err)));
-                rpath = path.join(item.value, 'bin', 'R.exe');
-            } catch (e) {
-                rpath = '';
-            }
+        path = config().get<string>('rterm.windows');
+        if (path === '') {
+            path = await getRfromRegistry();
         }
     } else if (platform === 'darwin') {
-        rpath = config().get<string>('rterm.mac');
+        path = config().get<string>('rterm.mac');
     } else if (platform === 'linux') {
-        rpath = config().get<string>('rterm.linux');
+        path = config().get<string>('rterm.linux');
     }
     
-    if (rpath === '') {
-        rpath = getRfromEnvPath(platform);
+    if (path === '') {
+        path = getRfromEnvPath(platform);
     }
-    if (rpath !== '') {
-        return rpath;
+    if (path !== '') {
+        return path;
     }
-    window.showErrorMessage(`${process.platform} can't use R`);
+    window.showErrorMessage(`${process.platform} can't find R`);
     return undefined;
 }
 

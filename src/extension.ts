@@ -5,6 +5,7 @@ import { CancellationToken, commands, CompletionContext, CompletionItem, Complet
          ExtensionContext, Hover, IndentAction, languages, MarkdownString, Position, Range,
          StatusBarAlignment, TextDocument, window } from 'vscode';
 
+import { createLanguageClient } from './languageClient';
 import { previewDataframe, previewEnvironment } from './preview';
 import { createGitignore } from './rGitignore';
 import { chooseTerminal, chooseTerminalAndSendText, createRTerm, deleteTerminal,
@@ -29,9 +30,12 @@ const roxygenTagCompletionItems = [
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
+
+    const client = await createLanguageClient();
+    context.subscriptions.push(client.start());
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
