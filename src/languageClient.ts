@@ -1,13 +1,14 @@
 import { spawn, ChildProcess } from 'child_process';
+import { join } from 'path';
 import * as vscode from 'vscode';
 import { LanguageClient, LanguageClientOptions, StreamInfo } from 'vscode-languageclient';
 import * as net from 'net';
 import * as url from 'url';
 import { config, getRpath } from './util';
 
-export async function createLanguageClient() {
+export async function createLanguageClient(extensionPath: string) {
   let client: LanguageClient;
-
+  const lspFile = join(extensionPath, 'R', 'lsp.R');
   const debug = config().get('lsp.debug');
   const path = await getRpath();
   if (debug) {
@@ -26,6 +27,7 @@ export async function createLanguageClient() {
     const str = `LANG: ${env.LANG}`;
     console.log(str);
   }
+  env.R_LSP_DEBUG = debug ? '1' : '0';
 
   const initArgs: string[] = config().get('lsp.args');
   initArgs.push('--quiet', '--slave');
@@ -44,13 +46,10 @@ export async function createLanguageClient() {
     // Listen on random port
     server.listen(0, '127.0.0.1', () => {
       const port = (server.address() as net.AddressInfo).port;
+      env.R_LSP_PORT = `${port}`;
       var args: string[];
       // The server is implemented in R
-      if (debug) {
-        args = initArgs.concat(['-e', `languageserver::run(port=${port},debug=TRUE)`]);
-      } else {
-        args = initArgs.concat(['-e', `languageserver::run(port=${port})`]);
-      }
+      args = initArgs.concat(['-f', lspFile]);
       const childProcess = spawn(path, args, { env: env });
       childProcess.stderr.on('data', (chunk: Buffer) => {
         const str = chunk.toString();
@@ -93,11 +92,7 @@ export async function createLanguageClient() {
   // Create the language client and start the client.
   if (use_stdio && process.platform !== 'win32') {
     var args: string[];
-    if (debug) {
-      args = initArgs.concat(['-e', `languageserver::run(debug=TRUE)`]);
-    } else {
-      args = initArgs.concat(['-e', `languageserver::run()`]);
-    }
+    args = initArgs.concat(['-f', lspFile]);
     client = new LanguageClient('R Language Server', { command: path, args: args, options: { env: env } }, clientOptions);
   } else {
     client = new LanguageClient('R Language Server', tcpServerOptions, clientOptions);

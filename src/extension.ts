@@ -34,7 +34,7 @@ export async function activate(context: ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
 
-    const client = await createLanguageClient();
+    const client = await createLanguageClient(context.extensionPath);
     context.subscriptions.push(client.start());
 
     // The command has been defined in the package.json file
