@@ -34,6 +34,7 @@
     "onLanguage:rmd",
     "onLanguage:debian-control.r",
     "workspaceContains:*.{rproj,Rproj,r,R,rd,Rd,rmd,Rmd}",
+    "onNotebookEditor:r-notebook",
     "onCommand:r.createRTerm",
     "onCommand:r.runSource",
     "onCommand:r.knitRmd",
@@ -516,7 +517,18 @@
           "description": "Delay in milliseconds before sending each line to rterm (only applies if r.bracketedPaste is false)"
         }
       }
-    }
+    },
+    "notebookProvider": [
+      {
+        "viewType": "r-notebook-provider",
+        "displayName": "R Notebook Provider",
+        "selector": [
+          {
+            "filenamePattern": "*.Rmd"
+          }
+        ]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "webpack --mode production",

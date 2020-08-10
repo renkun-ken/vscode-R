@@ -3,7 +3,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import { CancellationToken, commands, CompletionContext, CompletionItem, CompletionItemKind,
          ExtensionContext, Hover, IndentAction, languages, MarkdownString, Position, Range,
-         StatusBarAlignment, TextDocument, window } from 'vscode';
+         StatusBarAlignment, TextDocument, window, notebook } from 'vscode';
 
 import { previewDataframe, previewEnvironment } from './preview';
 import { createGitignore } from './rGitignore';
@@ -12,6 +12,7 @@ import { chooseTerminal, chooseTerminalAndSendText, createRTerm, deleteTerminal,
 import { getWordOrSelection, surroundSelection } from './selection';
 import { attachActive, deploySessionWatcher, globalenv, showPlotHistory, startRequestWatcher } from './session';
 import { config, ToRStringLiteral } from './util';
+import { RNotebookProvider } from './notebook';
 
 const wordPattern = /(-?\d*\.\d\w*)|([^\`\~\!\@\$\^\&\*\(\)\=\+\[\{\]\}\\\|\;\:\'\"\,\<\>\/\s]+)/g;
 
@@ -204,6 +205,7 @@ export function activate(context: ExtensionContext) {
         commands.registerCommand('r.runCommandWithEditorPath', runCommandWithEditorPath),
         commands.registerCommand('r.runCommand', runCommand),
         window.onDidCloseTerminal(deleteTerminal),
+        notebook.registerNotebookContentProvider("r-notebook-provider", new RNotebookProvider())
     );
 
     if (config().get<boolean>('sessionWatcher')) {
