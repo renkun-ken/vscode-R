@@ -48,6 +48,7 @@
     "onCommand:r.runCommandWithEditorPath",
     "onCommand:r.runCommand"
   ],
+  "enableProposedApi": true,
   "main": "./dist/extension",
   "contributes": {
     "languages": [
