@@ -206,7 +206,7 @@ export function activate(context: ExtensionContext) {
         commands.registerCommand('r.runCommandWithEditorPath', runCommandWithEditorPath),
         commands.registerCommand('r.runCommand', runCommand),
         window.onDidCloseTerminal(deleteTerminal),
-        notebook.registerNotebookContentProvider('r-notebook-provider',
+        notebook.registerNotebookContentProvider('r-notebook',
             new RNotebookProvider(path.join(context.extensionPath, 'R', 'notebook.R'))),
     );
 
