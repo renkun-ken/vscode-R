@@ -13,6 +13,7 @@ import { getWordOrSelection, surroundSelection } from './selection';
 import { attachActive, deploySessionWatcher, globalenv, showPlotHistory, startRequestWatcher } from './session';
 import { config, ToRStringLiteral } from './util';
 import { RNotebookProvider } from './notebook';
+import path = require('path');
 
 const wordPattern = /(-?\d*\.\d\w*)|([^\`\~\!\@\$\^\&\*\(\)\=\+\[\{\]\}\\\|\;\:\'\"\,\<\>\/\s]+)/g;
 
@@ -205,7 +206,8 @@ export function activate(context: ExtensionContext) {
         commands.registerCommand('r.runCommandWithEditorPath', runCommandWithEditorPath),
         commands.registerCommand('r.runCommand', runCommand),
         window.onDidCloseTerminal(deleteTerminal),
-        notebook.registerNotebookContentProvider("r-notebook-provider", new RNotebookProvider())
+        notebook.registerNotebookContentProvider("r-notebook-provider",
+            new RNotebookProvider(path.join(context.extensionPath, 'R', 'notebook.R'))),
     );
 
     if (config().get<boolean>('sessionWatcher')) {
