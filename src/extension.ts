@@ -207,7 +207,7 @@ export function activate(context: ExtensionContext) {
         commands.registerCommand('r.runCommand', runCommand),
         window.onDidCloseTerminal(deleteTerminal),
         notebook.registerNotebookContentProvider('r-notebook',
-            new RNotebookProvider(path.join(context.extensionPath, 'R', 'notebook.R'))),
+            new RNotebookProvider(path.join(context.extensionPath, 'R', 'notebook2.R'))),
     );
 
     if (config().get<boolean>('sessionWatcher')) {
