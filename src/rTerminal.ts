@@ -24,8 +24,6 @@ export async function createRTerm(preserveshow?: boolean): Promise<boolean> {
         if (exists) {
             const termOptions: TerminalOptions = {
                 name: termName,
-                shellPath: termPath,
-                shellArgs: termOpt,
             };
             if (config().get<boolean>('sessionWatcher')) {
                 termOptions.env = {
@@ -33,8 +31,11 @@ export async function createRTerm(preserveshow?: boolean): Promise<boolean> {
                     R_PROFILE_USER: path.join(os.homedir(), '.vscode-R', '.Rprofile'),
                 };
             }
+            // Start a shell and execute R terminal from shell to
+            // inherit environment variables from shell
             rTerm = window.createTerminal(termOptions);
             rTerm.show(preserveshow);
+            rTerm.sendText(`${termPath} ${termOpt.join(' ')}`);
 
             return true;
         }
