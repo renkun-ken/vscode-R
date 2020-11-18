@@ -304,11 +304,19 @@ async function getTableHtml(webview: Webview, file: string) {
   <link href="${String(webview.asWebviewUri(Uri.file(path.join(resDir, 'fixedHeader.jqueryui.min.css'))))}" rel="stylesheet">
   <style type="text/css">
     body {
-        color: black;
-        background-color: white;
+        color: var(--vscode-editor-foreground);
+        background-color: var(--vscode-editor-background);
+        padding: 4px 0;
+    }
+    table.table.fixedHeader-floating {
+        background-color: var(--vscode-editor-background);
     }
     table {
         font-size: 0.75em;
+    }
+    div.dataTables_filter input {
+        color: var(--vscode-editor-foreground);
+        background-color: var(--vscode-editor-background);
     }
   </style>
 </head>
